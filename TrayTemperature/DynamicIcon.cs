@@ -11,8 +11,7 @@ namespace TrayTemperature {
 
 			//Draw the temperatures
 			graph.DrawString(Line1Text, font, new SolidBrush(Line1Color), new PointF(-1,-3));
-			graph.DrawString(Line2Text, font, new SolidBrush(Line2Color), new PointF(-1, 7));
-
+			
 			return Icon.FromHandle(bitmap.GetHicon());
 		}
 	}
