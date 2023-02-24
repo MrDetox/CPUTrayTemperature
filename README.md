@@ -1,6 +1,7 @@
-# Fergo TrayTemperature
+# CPU TrayTemperature
 
-A very simple CPU and GPU temperature monitor for the system tray.
+A very simple CPU temperature monitor for the system tray.
+Based on Fergo Tray Temperature
 
 ![TrayTemperature](https://i.imgur.com/pwWbuCm.jpg)
 
@@ -9,7 +10,7 @@ Tons of other softwares already provide this functionality, but I wanted somethi
 # Features
 
 * Minimalistic text display, matching default Windows 10 tray icon style
-* Real-time CPU and GPU temperatures
+* Real-time CPU temperatures
 * Customizable text colors for each temperature range (low, mid high)
 * Customizable refresh interval 
 * Basic logging functionality
@@ -18,7 +19,7 @@ Tons of other softwares already provide this functionality, but I wanted somethi
 
 # Usage
 
-Just run  `TrayTemperature.exe` and a tray icon will be added displaying the CPU temperature (top) and GPU temperature (bottom). 
+Just run  `TrayTemperature.exe` and a tray icon will be added displaying the CPU temperature.
 
 The application requires elevated priviledges in order to properly acquire the sensor data.
 
@@ -65,7 +66,7 @@ To customize the temperature ranges and their different colors, edit the followi
 
 Check the **Releases** page: 
 
-https://github.com/Fergo/TrayTemperature/releases
+https://github.com/MrDetox/CPUTrayTemperature/releases
 
 # Source code requirements 
 
