@@ -14,7 +14,7 @@ namespace TrayTemperature {
 		static ulong CPUAcc = 0, GPUAcc = 0, regCount = 0;
 		static bool isLogging = false;
 
-		static Computer computer = new Computer() { CPUEnabled = true, GPUEnabled = true };
+		static Computer computer = new Computer() { CPUEnabled = true, GPUEnabled = false };
 		static Timer tmr;
 		static NotifyIcon ni;
 		static ContextMenu contextMenu;
@@ -224,22 +224,20 @@ namespace TrayTemperature {
 		private static void tmr_tick(object sender, EventArgs e) {
 
 			//Updates the sensors on each hardware part
-			foreach (IHardware hardware in computer.Hardware) {
+			foreach (IHardware hardware in computer.Hardware)
+			{
+			    if (hardware.HardwareType == HardwareType.CPU)
+			    {
 				hardware.Update();
-
-				//Get all temperature censors
 				ISensor sensor = hardware.Sensors.FirstOrDefault(d => d.SensorType == SensorType.Temperature);
-
-				if (sensor != null) {
-					if (hardware.HardwareType == HardwareType.CPU)
-						CPU = Convert.ToInt32(sensor.Value);
-					else
-						GPU = Convert.ToInt32(sensor.Value);
-				}
+				if (sensor != null)
+				    CPU = Convert.ToInt32(sensor.Value);
+			    }
 			}
 
+
 			//Select appropriate color based on settings
-			Color cpuColor, gpuColor;
+			Color cpuColor;
 
 			if (CPU >= Properties.Settings.Default.CPUTempHigh)
 				cpuColor = ColorTranslator.FromHtml(Properties.Settings.Default.CPUHigh);
@@ -248,31 +246,18 @@ namespace TrayTemperature {
 			else
 				cpuColor = ColorTranslator.FromHtml(Properties.Settings.Default.CPULow);
 
-			if (GPU >= Properties.Settings.Default.GPUTempHigh)
-				gpuColor = ColorTranslator.FromHtml(Properties.Settings.Default.GPUHigh);
-			else if (GPU >= Properties.Settings.Default.GPUTempMed)
-				gpuColor = ColorTranslator.FromHtml(Properties.Settings.Default.GPUMed);
-			else
-				gpuColor = ColorTranslator.FromHtml(Properties.Settings.Default.GPULow);
-
 			//Unit conversion for loggin and displaying
 			int convertedCPU = Convert.ToInt32(Properties.Settings.Default.Celsius ? CPU : CPU * 1.8 + 32);
-			int convertedGPU = Convert.ToInt32(Properties.Settings.Default.Celsius ? GPU : GPU * 1.8 + 32);
 			string tempUnit = Properties.Settings.Default.Celsius ? "°C" : "°F";
 
 			//Calculate statistics. CPUAcc and GPUAcc will eventually overflow after around 5.8 billion years with 1s updates, so I guess there's no worry there...
 			CPUAcc += (ulong)convertedCPU;
-			GPUAcc += (ulong)convertedGPU;
 			regCount++;
 
 			if (CPU > CPUMax)
 				CPUMax = CPU;
 			if (CPU < CPUMin)
 				CPUMin = CPU;
-			if (GPU > GPUMax)
-				GPUMax = GPU;
-			if (GPU < GPUMin)
-				GPUMin = GPU;
 
 			//Appends a new line to the current log file (CSV format)
 			if (isLogging && sw != null)
@@ -294,7 +279,7 @@ namespace TrayTemperature {
 			SetNotifyIconText(ni, sb.ToString());
 
 			//Updates the icon
-			ni.Icon = DynamicIcon.CreateIcon(convertedCPU.ToString() + tempUnit, cpuColor, convertedGPU.ToString() + tempUnit, gpuColor);
+			ni.Icon = DynamicIcon.CreateIcon(convertedCPU.ToString() + tempUnit, cpuColor);
 		}
 
 		//Little hack to bypass the 63 char limit of the WinForms tooltip (still limited to the 127 chars of regular Win32 control)
