@@ -1,18 +1,48 @@
-﻿using System.Drawing;
+using System;
+using System.Drawing;
+using System.Runtime.InteropServices;
 
-namespace TrayTemperature {
-	class DynamicIcon {
-		//Creates a 16x16 icon with 2 lines of  text
-		public static Icon CreateIcon(string Line1Text, Color Line1Color, string Line2Text, Color Line2Color) {
-			Font font = new Font("Consolas", 7);
-			Bitmap bitmap = new Bitmap(16, 16);
+namespace TrayTemperature
+{
+    class DynamicIcon
+    {
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        extern static bool DestroyIcon(IntPtr handle);
 
-			Graphics graph = Graphics.FromImage(bitmap);
+        // Store the old icon
+        private static Icon _oldIcon = null;
 
-			//Draw the temperatures
-			graph.DrawString(Line1Text, font, new SolidBrush(Line1Color), new PointF(-1,-3));
-			
-			return Icon.FromHandle(bitmap.GetHicon());
-		}
-	}
+        public static Icon CreateIcon(string Line1Text, Color Line1Color)
+        {
+            Font font = new Font("Roboto Mono", 10);
+            Bitmap bitmap = new Bitmap(16, 16);
+            Icon icon;
+
+            using (Graphics graph = Graphics.FromImage(bitmap))
+            {
+                SizeF stringSize = graph.MeasureString(Line1Text, font);
+                float x = (bitmap.Width - stringSize.Width) / 2;
+                float y = (bitmap.Height - stringSize.Height) / 2;
+
+                graph.DrawString(Line1Text, font, new SolidBrush(Line1Color), new PointF(-3, 0));
+            }
+
+            IntPtr hIcon = bitmap.GetHicon();
+            icon = Icon.FromHandle(hIcon);
+
+            // Destroy old icon if it exists
+            if (_oldIcon != null)
+            {
+                DestroyIcon(_oldIcon.Handle);
+                _oldIcon.Dispose();
+            }
+
+            // Remember this icon for next time
+            _oldIcon = icon;
+
+            bitmap.Dispose();
+
+            return icon;
+        }
+    }
 }
